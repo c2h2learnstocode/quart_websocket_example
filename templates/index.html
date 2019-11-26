@@ -7,15 +7,50 @@
     <input type="text" id="message">
     <button>Send</button>
     <ul></ul>
+    <!--<img src="https://source.unsplash.com/random/300x200" id="myimg"> 
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
     <script type="text/javascript">
-      var ws = new WebSocket('ws://' + document.domain + ':' + location.port + '/ws0');
-      ws.onmessage = function (event) {
-        var messages_dom = document.getElementsByTagName('ul')[0];
-        var message_dom = document.createElement('li');
-        var content_dom = document.createTextNode('Received: ' + event.data);
-        message_dom.appendChild(content_dom);
-        messages_dom.appendChild(message_dom);
-      };
+      var ws = "";
+      function _connect() {
+        ws = new WebSocket('ws://' + document.domain + ':' + location.port + '/ws0');
+
+        ws.onopen = function() {
+          // subscribe to some channels
+          ws.send(JSON.stringify({
+              //.... some message the I must send when I connect ....
+          }));
+        };
+
+        /*
+        ws.onmessage = function(e) {
+          console.log('Message:', e.data);
+        };
+        */
+
+        ws.onmessage = function (event) {
+          var messages_dom = document.getElementsByTagName('ul')[0];
+          var message_dom = document.createElement('li');
+          var content_dom = document.createTextNode('Received: ' + event.data);
+          message_dom.appendChild(content_dom);
+          messages_dom.appendChild(message_dom);
+          //$("#myimg").attr("src", "https://source.unsplash.com/random/300x"+event.data);
+        };
+
+
+        ws.onclose = function(e) {
+          console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+          setTimeout(function() {
+            _connect();
+          }, 1000);
+        };
+
+        ws.onerror = function(err) {
+          console.error('Socket encountered error: ', err.message, 'Closing socket');
+          ws.close();
+        };
+      }
+
+      _connect();
 
       var button = document.getElementsByTagName('button')[0];
       button.onclick = function() {
