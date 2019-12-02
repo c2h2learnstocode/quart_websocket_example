@@ -1,10 +1,24 @@
 from quart import Quart, render_template, websocket
 from functools import partial, wraps
 import asyncio
+import json
+import time
+from datetime import datetime
 
 app = Quart(__name__)
 
 connected_websockets = set()
+
+beacon_start=False
+
+
+async def beacon_json():
+    a={}
+    while True:
+        dt_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        a["beacon"]=dt_string
+        await asyncio.sleep(5)
+        await broadcast(json.dumps(a))
 
 def collect_websocket(func):
     @wraps(func)
@@ -42,7 +56,8 @@ async def receiving():
 async def ws(queue):
     producer = asyncio.create_task(sending(queue))
     consumer = asyncio.create_task(receiving())
-    await asyncio.gather(producer, consumer)
+    beaconer = asyncio.create_task(beacon_json())
+    await asyncio.gather(producer, consumer, beaconer)
 
 if __name__ == '__main__':
     app.run(port=5000)
