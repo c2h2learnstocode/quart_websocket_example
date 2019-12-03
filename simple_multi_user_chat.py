@@ -56,8 +56,16 @@ async def receiving():
 async def ws(queue):
     producer = asyncio.create_task(sending(queue))
     consumer = asyncio.create_task(receiving())
-    beaconer = asyncio.create_task(beacon_json())
-    await asyncio.gather(producer, consumer, beaconer)
+    #beaconer = asyncio.create_task(beacon_json())
+    await asyncio.gather(producer, consumer)
+
+@app.before_serving
+async def startup():
+    app.beacon_task = asyncio.create_task(beacon_json())
+
+@app.after_serving
+async def shutdown():
+    app.beacon_task.cancel()
 
 if __name__ == '__main__':
     app.run(port=5000)
