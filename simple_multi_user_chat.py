@@ -15,9 +15,10 @@ beacon_start=False
 async def beacon_json():
     a={}
     while True:
+        await asyncio.sleep(5)
         dt_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         a["beacon"]=dt_string
-        await asyncio.sleep(5)
+        a["connected_websockets"]=len(connected_websockets)
         await broadcast(json.dumps(a))
 
 def collect_websocket(func):
