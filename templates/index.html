@@ -2,8 +2,11 @@
 <html>
   <head>
     <title>Websocket example</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   </head>
   <body>
+    <h4>Last json received: <span id="pbox_time">None</span>, Connected Clients: <span id="pbox_clients">0</span></h4>
     <input type="text" id="message">
     <button>Send</button>
     <ul></ul>
@@ -33,6 +36,15 @@
           var content_dom = document.createTextNode('Received: ' + event.data);
           message_dom.appendChild(content_dom);
           messages_dom.appendChild(message_dom);
+          var response=jQuery.parseJSON(event.data);
+          if(typeof response =='object'){
+            $("#pbox_time").text(response["beacon"]);
+            $("#pbox_clients").text(response["connected_websockets"]);
+            // It is JSON
+          }else{
+            
+          }
+          
           //$("#myimg").attr("src", "https://source.unsplash.com/random/300x"+event.data);
         };
 
